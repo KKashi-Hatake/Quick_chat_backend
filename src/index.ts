@@ -39,7 +39,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 
 
-app.use('/api', authRoutes)
+app.use('/api/v1', authRoutes)
 
 const port = process.env.PORT || 8010;
 
@@ -53,3 +53,4 @@ server.listen(port, () => console.log(`server is running on ${port}`))
 
 setupSocket(io);
 export { io };
+
