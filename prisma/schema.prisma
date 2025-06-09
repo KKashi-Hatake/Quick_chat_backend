@@ -7,48 +7,104 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// ENUM Values
+enum Role {
+    admin
+    member
+}
+
+enum MessageType {
+    text
+    image
+    video
+    audio
+    file
+}
+
+enum MessageStatusEnum {
+    sent
+    delivered
+    read
+}
+
 model User {
-    id         Int         @id @default(autoincrement())
-    name       String      @db.VarChar(191)
-    image      String?
-    phone      String       @unique
-    password      String
-    created_at DateTime    @default(now())
-    ChatGroup  ChatGroup[]
+    id                       Int                        @id @default(autoincrement())
+    name                     String                     @db.VarChar(191)
+    image                    String?
+    phone                    String                     @unique
+    password                 String
+    created_at               DateTime                   @default(now())
+    last_seen                DateTime?                  @default(now())
+    about                    String?                    @default("")
+    verificationId           Int                        @unique
+    twoFAId                  Int?                       @unique
+    verification             Verification?              @relation(fields: [verificationId], references: [id])
+    twoFA                    TwoFA?                     @relation(fields: [twoFAId], references: [id])
+    Message                  Message[]
+    conversation             Conversation[]
+    conversationParticipants ConversationParticipants[]
+    MessageStatus            MessageStatus[]
 
     @@map("users")
 }
 
-model ChatGroup {
-    id         String       @id @default(uuid()) @db.Uuid
-    user       User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-    user_id    Int
-    title      String       @db.VarChar(191)
-    passcode   String       @db.VarChar(30)
-    created_at DateTime     @default(now())
-    GroupUsers GroupUsers[]
-    Chats      Chats[]
-
-    @@index([created_at])
-    @@map("chat_groups")
+model Verification {
+    id     Int     @id @default(autoincrement())
+    otp    Int
+    status Boolean @default(false)
+    user   User?
 }
 
-model GroupUsers {
-    id         Int       @id @default(autoincrement())
-    group      ChatGroup @relation(fields: [group_id], references: [id], onDelete: Cascade)
-    group_id   String    @db.Uuid
-    name       String
-    created_at DateTime  @default(now())
+model TwoFA {
+    id     Int     @id @default(autoincrement())
+    status Boolean @default(false)
+    user   User?
 }
 
-model Chats {
-    id         String    @id @default(uuid()) @db.Uuid
-    group      ChatGroup @relation(fields: [group_id], references: [id], onDelete: Cascade)
-    group_id   String    @db.Uuid
-    message    String?
-    name       String
-    created_at DateTime  @default(now())
+model Conversation {
+    id           Int                        @id @default(autoincrement())
+    name         String?
+    description  String?
+    created_by   Int
+    avatar       String?
+    created_at   DateTime                   @default(now())
+    user         User                       @relation(fields: [created_by], references: [id])
+    participants ConversationParticipants[]
+    messages     Message[]
+}
 
-    @@index([created_at])
-    @@map("chats")
+model ConversationParticipants {
+    id             Int          @id @default(autoincrement())
+    conversationId Int
+    conversation   Conversation @relation(fields: [conversationId], references: [id])
+    userId         Int
+    user           User         @relation(fields: [userId], references: [id])
+    joined_at      DateTime     @default(now())
+    role           Role         @default(member)
+}
+
+model Message {
+    id             Int             @id @default(autoincrement())
+    content        String
+    senderId       Int
+    conversationId Int?
+    messageType    MessageType     @default(text)
+    mediaUrl       String?
+    created_at     DateTime        @default(now())
+    is_deleted     Boolean         @default(false)
+    user           User            @relation(fields: [senderId], references: [id])
+    Conversation   Conversation?   @relation(fields: [conversationId], references: [id])
+    MessageStatus  MessageStatus[]
+}
+
+model MessageStatus {
+    id         Int               @id @default(autoincrement())
+    messageId  Int
+    userId     Int
+    status     MessageStatusEnum // sent, delivered, read
+    updated_at DateTime          @default(now())
+    message    Message?          @relation(fields: [messageId], references: [id])
+    user       User?             @relation(fields: [userId], references: [id])
+
+    @@unique([messageId, userId])
 }

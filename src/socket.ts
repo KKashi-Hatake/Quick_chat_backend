@@ -8,7 +8,7 @@ interface CustomSocket extends Socket {
 }
 
 export function setupSocket(io: Server) {
-
+    console.log("from socket setup");
     io.use((socket: CustomSocket, next) => {
         const room = socket.handshake.auth.room || socket.handshake.headers.room;
         if (!room) {

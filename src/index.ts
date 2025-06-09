@@ -6,7 +6,7 @@ import { createServer } from 'http';
 import { createAdapter } from "@socket.io/redis-streams-adapter";
 import authRoutes from './routes/index.ts'
 import { setupSocket } from './socket.ts';
-import redis from './config/redis.config.ts';
+// import redis from './config/redis.config.ts';
 import { instrument } from "@socket.io/admin-ui"
 
 

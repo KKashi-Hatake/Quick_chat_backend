@@ -8,9 +8,12 @@ import { deleteFileFromS3 } from "../../services/AWS/deleteFromS3";
 
 export const router = Router();
 
+router.get('/verify-otp/:id', AuthController.verifyOTP)
+
 
 router.post('/login', AuthController.login)
 router.post('/signup', AuthController.signup)
+
 
 // File(image/avatar) upload
 router.post('/upload', uploader.single('file'), uploadFileToS3)

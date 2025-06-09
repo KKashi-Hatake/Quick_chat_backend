@@ -3,21 +3,15 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import AsyncHandler from '../../middlewares/AsyncHandler';
 import { Request, Response } from 'express';
 import { s3 } from '../../config/aws.config';
+import { getPresigned } from '../../utils/getPresigned';
 
 export const generatePresignedUrl = AsyncHandler(async (req: Request, res: Response) => {
-  const { key } = req.query; // e.g. profile_pic/user123.png
+  const key: string = req?.query?.key as string || ""; // e.g. profile_pic/user123.png
 
   if (!key) return res.status(400).json({ error: 'Missing key' });
 
   try {
-    const command = new GetObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME!,
-      Key: key as string,
-    });
-
-    const signedUrl = await getSignedUrl(s3, command, {
-      expiresIn: 60 * 60, // seconds (1 hour) max 7 days
-    });
+    const signedUrl = await getPresigned(key)
 
     res.status(200).json({ url: signedUrl });
   } catch (err) {
