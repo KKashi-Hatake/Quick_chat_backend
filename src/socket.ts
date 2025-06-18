@@ -8,7 +8,6 @@ interface CustomSocket extends Socket {
 }
 
 export function setupSocket(io: Server) {
-    console.log("from socket setup");
     io.use((socket: CustomSocket, next) => {
         const room = socket.handshake.auth.room || socket.handshake.headers.room;
         if (!room) {
@@ -26,7 +25,7 @@ export function setupSocket(io: Server) {
         socket.on("message", async (data) => {
             console.log("Server side message", data);
             // socket.broadcast.emit("message", data);
-            await prisma.chats.create({
+            await prisma.conversation.create({
                 data:data
             })
             socket.to(socket?.room!).emit('message', data)

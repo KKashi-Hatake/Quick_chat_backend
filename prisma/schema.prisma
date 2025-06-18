@@ -13,6 +13,11 @@ enum Role {
     member
 }
 
+enum Type {
+    normal
+    group
+}
+
 enum MessageType {
     text
     image
@@ -28,22 +33,23 @@ enum MessageStatusEnum {
 }
 
 model User {
-    id                       Int                        @id @default(autoincrement())
-    name                     String                     @db.VarChar(191)
-    image                    String?
-    phone                    String                     @unique
-    password                 String
-    created_at               DateTime                   @default(now())
-    last_seen                DateTime?                  @default(now())
-    about                    String?                    @default("")
-    verificationId           Int                        @unique
-    twoFAId                  Int?                       @unique
-    verification             Verification?              @relation(fields: [verificationId], references: [id])
-    twoFA                    TwoFA?                     @relation(fields: [twoFAId], references: [id])
-    Message                  Message[]
-    conversation             Conversation[]
-    conversationParticipants ConversationParticipants[]
-    MessageStatus            MessageStatus[]
+    id               Int                        @id @default(autoincrement())
+    name             String                     @db.VarChar(191)
+    image            String?
+    phone            String                     @unique
+    password         String
+    created_at       DateTime                   @default(now())
+    last_seen        DateTime?                  @default(now())
+    about            String?                    @default("")
+    verificationId   Int                        @unique
+    twoFAId          Int?                       @unique
+    verification     Verification?              @relation(fields: [verificationId], references: [id])
+    twoFA            TwoFA?                     @relation(fields: [twoFAId], references: [id])
+    Message          Message[]
+    conversation     Conversation[]
+    MessageStatus    MessageStatus[]
+    UserParticipants ConversationParticipants[] @relation("UserParticipant")
+    CreatedBy        ConversationParticipants[] @relation("CreatedBy")
 
     @@map("users")
 }
@@ -67,6 +73,7 @@ model Conversation {
     description  String?
     created_by   Int
     avatar       String?
+    type         Type                       @default(normal)
     created_at   DateTime                   @default(now())
     user         User                       @relation(fields: [created_by], references: [id])
     participants ConversationParticipants[]
@@ -74,13 +81,17 @@ model Conversation {
 }
 
 model ConversationParticipants {
-    id             Int          @id @default(autoincrement())
-    conversationId Int
-    conversation   Conversation @relation(fields: [conversationId], references: [id])
+    id             Int           @id @default(autoincrement())
+    first_name     String?
+    last_name      String?
+    conversationId Int?
+    conversation   Conversation? @relation(fields: [conversationId], references: [id])
     userId         Int
-    user           User         @relation(fields: [userId], references: [id])
-    joined_at      DateTime     @default(now())
-    role           Role         @default(member)
+    user           User          @relation("UserParticipant", fields: [userId], references: [id], map: "fk_user_participant")
+    joined_at      DateTime      @default(now())
+    role           Role          @default(member)
+    created_by     Int
+    creator        User          @relation("CreatedBy", fields: [created_by], references: [id], map: "fk_created_by")
 }
 
 model Message {

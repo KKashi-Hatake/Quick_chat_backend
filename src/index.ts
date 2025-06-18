@@ -4,7 +4,7 @@ import 'dotenv/config';
 import { Server } from "socket.io"
 import { createServer } from 'http';
 import { createAdapter } from "@socket.io/redis-streams-adapter";
-import authRoutes from './routes/index.ts'
+import routes from './routes/index.ts'
 import { setupSocket } from './socket.ts';
 // import redis from './config/redis.config.ts';
 import { instrument } from "@socket.io/admin-ui"
@@ -39,7 +39,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 
 
-app.use('/api/v1', authRoutes)
+app.use('/api/v1', routes)
 
 const port = process.env.PORT || 8010;
 
