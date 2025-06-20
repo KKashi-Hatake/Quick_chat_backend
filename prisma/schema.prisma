@@ -85,6 +85,7 @@ model ConversationParticipants {
     first_name     String?
     last_name      String?
     conversationId Int?
+    image           String?
     conversation   Conversation? @relation(fields: [conversationId], references: [id])
     userId         Int
     user           User          @relation("UserParticipant", fields: [userId], references: [id], map: "fk_user_participant")
