@@ -8,14 +8,14 @@ interface CustomSocket extends Socket {
 }
 
 export function setupSocket(io: Server) {
-    io.use((socket: CustomSocket, next) => {
-        const room = socket.handshake.auth.room || socket.handshake.headers.room;
-        if (!room) {
-            return next(new Error('Invalid room, Please pass correct room id'))
-        }
-        socket.room = room;
-        next();
-    })
+    // io.use((socket: CustomSocket, next) => {
+    //     const room = socket.handshake.auth.room || socket.handshake.headers.room;
+    //     if (!room) {
+    //         return next(new Error('Invalid room, Please pass correct room id'))
+    //     }
+    //     socket.room = room;
+    //     next();
+    // })
 
 
     io.on("connection", (socket: CustomSocket) => {
