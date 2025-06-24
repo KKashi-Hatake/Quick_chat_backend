@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {router as AuthRouter} from './auth/auth.route';
 import {router as UserRouter} from './user/user.route';
+import {router as ConvRouter} from './conversation/conv.route';
 import ChatGroupController from "../controllers/ChatGroup.controller";
 import  authMiddleware  from "../middlewares/AuthMiddleware";
 import ChatGroupUserController from "../controllers/ChatGroupUser.controller";
@@ -13,6 +14,10 @@ router.use('/auth', AuthRouter)
 
 //User
 router.use('/user', UserRouter)
+
+
+//conversations
+router.use('/conv', ConvRouter)
 
 
 //Chat group routes

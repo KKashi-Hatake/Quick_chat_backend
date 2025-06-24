@@ -1,7 +1,7 @@
 import prisma from "../config/db.config";
 import { Request, Response } from "express";
 import AsyncHandler from "../middlewares/AsyncHandler";
-import { AuthUser } from "../custom-types";
+import { AuthUser, SearchChatsContactsType } from "../custom-types";
 import { User } from "@prisma/client";
 import { getPresigned } from "../utils/getPresigned";
 
@@ -56,6 +56,7 @@ const createConversationParticipant = AsyncHandler(async (req: Request, res: Res
             first_name: firstName || "",
             last_name: lastName || "",
             image: parti.image || "",
+            about: parti.about || ""
         }
     })
     if (!convParti) {
@@ -68,6 +69,65 @@ const createConversationParticipant = AsyncHandler(async (req: Request, res: Res
 })
 
 
+const searchChatsContacts = AsyncHandler(async (req: Request, res: Response) => {
+    const searchTerm = req?.query?.search || "";
+    const user = req?.user as User;
+    if (!searchTerm) {
+        return res.status(400).json({ success: false, message: "Invalid payload." })
+    }
+    const searchResults = await prisma.conversationParticipants.findMany({
+        where: {
+            created_by: user.id,
+            OR: [
+                {
+                    first_name: {
+                        contains: searchTerm as string,
+                        mode: 'insensitive', // optional for case-insensitive match
+                    },
+                },
+                {
+                    last_name: {
+                        contains: searchTerm as string,
+                        mode: 'insensitive',
+                    },
+                },
+            ],
+        },
+        include: {
+            conversation: {
+                include: {
+                    messages: true
+                }
+            }
+        }
+    })
+    let result: { chats: SearchChatsContactsType[], contacts: SearchChatsContactsType[] } = { chats: [], contacts: [] };
+    if (searchResults) {
+        const processedResults = await Promise.allSettled(
+            searchResults.map(async (val) => {
+                try {
+                    val.image = val?.image ? await getPresigned(val.image) : val.image;
+                } catch (e) {
+                    console.error("Failed to get presigned URL", e);
+                }
+                return val;
+            })
+        );
+
+        // Extract successful results only
+        for (const resultItem of processedResults) {
+            if (resultItem.status === 'fulfilled') {
+                const val = resultItem.value;
+                if (val.conversation === null) {
+                    result.contacts.push(val);
+                } else {
+                    result.chats.push(val);
+                }
+            }
+        }
+    }
+    return res.json({ success: true, message: "Chats and contacts fetched successfully.", result })
+})
 
 
 
@@ -78,5 +138,7 @@ const createConversationParticipant = AsyncHandler(async (req: Request, res: Res
 
 export default {
     searchUser,
+    searchChatsContacts,
+
     createConversationParticipant
 }
