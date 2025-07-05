@@ -19,7 +19,7 @@ const server = createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:3000", "https://admin.socket.io"],
+        origin: ["http://192.168.1.4:3000", "http://localhost:3000", "https://admin.socket.io"],
         credentials: true,
     },
     // adapter: createAdapter(redis)

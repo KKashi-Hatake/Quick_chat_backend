@@ -1,3 +1,4 @@
+import { MessageTypeEnum, TypeEnum } from "@prisma/client";
 import { Request } from "express";
 
 
@@ -6,7 +7,8 @@ export interface AuthUser {
     id: number;
     name: string;
     phone: string;
-
+    image: string | null
+    about: string | null
 }
 
 
@@ -17,6 +19,7 @@ export interface User {
     phone: string,
     password: sring,
     created_at: Date,
+    updated_at: Date,
     last_seen?: Date | null,
     about?: string | null,
     verificationId: number,
@@ -43,7 +46,8 @@ export type SearchChatsContactsType = {
     conversation?: ConversationType | null
     image?: string | null
     userId: number
-    joined_at: Date
+    created_at: Date
+    updated_at: Date
     role: string
     created_by: number
 }
@@ -65,6 +69,15 @@ export interface IConversation {
     last_name?: string | null
     image?: string | null
     conversation: ConversationType | null
+}
+
+export type MessagePayloadType = {
+    userId: number,
+    msg: string
+    convType: TypeEnum,
+    partiId: number,
+    mediaUrl: string,
+    type: MessageTypeEnum
 }
 
 

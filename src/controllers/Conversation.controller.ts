@@ -13,7 +13,7 @@ const getAllConv = AsyncHandler(async (req: Request, res: Response) => {
     const participants = await prisma.conversationParticipants.findMany({
         where: {
             created_by: user.id,
-            conversationId:{
+            conversationId: {
                 not: null
             }
         },
@@ -23,6 +23,10 @@ const getAllConv = AsyncHandler(async (req: Request, res: Response) => {
                     messages: {
                         orderBy: { created_at: 'desc' },
                         take: 1,
+                        include: {
+                            MessageStatus: true,
+                            sender: true
+                        }
                     },
                 },
             },

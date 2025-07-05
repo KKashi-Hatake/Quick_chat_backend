@@ -26,7 +26,7 @@ export const isAuthenticated = AsyncHandler(async (req: Request, res: Response, 
         });
         if (!user) {
             console.log("User not found while verifying token");
-            return res.status(404).json({ message: 'Unauthorized access.' });
+            return res.status(401).json({ message: 'Unauthorized access.' });
         }
         req.user = user;
         next();
