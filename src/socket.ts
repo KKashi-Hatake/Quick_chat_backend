@@ -9,11 +9,11 @@ interface CustomSocket extends Socket {
 
 
 
-export const getReceiverSocketId = (receiverId: number) => {
+export const getReceiverSocketId = (receiverId: string) => {
     return userSocketMap[receiverId];
 };
 
-const userSocketMap: { [key: number]: string } = {}; // {userId: socketId}
+const userSocketMap: { [key: string]: string } = {}; // {userId: socketId}
 
 
 
@@ -30,11 +30,10 @@ export function setupSocket(io: Server) {
 
     io.on("connection", (socket: CustomSocket) => {
         console.log("Client connected", socket.id);
-        const userIdStr = socket.handshake.query.userId as string;
-        const userId = Number(userIdStr);
-        console.log(userId)
-        if (!isNaN(userId)) {
-            userSocketMap[userId] = socket.id;
+        const userIdStr = socket.handshake.query.userId as string || "";
+        console.log(userIdStr)
+        if (!userIdStr) {
+            userSocketMap[userIdStr] = socket.id;
         }
 
         // socket.join(socket.room!)
@@ -49,7 +48,7 @@ export function setupSocket(io: Server) {
         })
 
         socket.on("disconnect", () => {
-            delete userSocketMap[userId];
+            delete userSocketMap[userIdStr];
             console.log("A user got disconnected", socket.id)
         })
     })

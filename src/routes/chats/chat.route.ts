@@ -14,6 +14,7 @@ export const router = Router();
 
 
 router.post('/send', isAuthenticated, ChatsController.sendMsg)
+router.get('/getMessages/:id', isAuthenticated, ChatsController.getAllMessages)
 
 
 

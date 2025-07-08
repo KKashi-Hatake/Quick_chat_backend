@@ -182,7 +182,40 @@ const sendMsg = AsyncHandler(async (req: Request, res: Response) => {
 })
 
 
+const getAllMessages = AsyncHandler(async (req: Request, res: Response) => {
+    const convId = req.params.id || "";
+    const limit = parseInt(req.query.limit as string || '10'); // default limit to 10 if not provided
+    const cursor = req.query.cursor as string || ''; // default limit to 10 if not provided
+
+    if (!convId) return res.status(400).json({ error: "convId is required" });
+    const messages = await prisma.message.findMany({
+        where: {
+            conversationId: convId,
+            ...(cursor ? { created_at: { lt: new Date(cursor as string) } } : {}) // get older than cursor
+        },
+        include: {
+            MessageStatus: true,
+            sender: {
+                select: {
+                    first_name: true,
+                    last_name: true,
+                    image: true,
+                    id: true
+                }
+            }
+        },
+        take: Number(limit),
+        orderBy: {
+            created_at: 'desc'
+        }
+    })
+
+    return res.json({ success: true, message: "Messages fetched successfully.", data: messages });
+})
+
+
 
 export default {
-    sendMsg
+    sendMsg,
+    getAllMessages
 };

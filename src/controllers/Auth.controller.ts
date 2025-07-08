@@ -109,7 +109,7 @@ async function verifyOTP(req: Request, res: Response) {
             return res.status(400).json({ message: "Invalid request!" })
         }
         const user = await prisma.user.findUnique({
-            where: { id: Number(id) },
+            where: { id: id },
             include: {
                 verification: true, // this assumes a `verification` relation exists in your Prisma schema
             },

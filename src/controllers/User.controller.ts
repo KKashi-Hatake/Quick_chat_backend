@@ -51,8 +51,8 @@ const createConversationParticipant = AsyncHandler(async (req: Request, res: Res
     }
     convParti = await prisma.conversationParticipants.create({
         data: {
-            userId: id as number,
-            created_by: user?.id as number,
+            userId: id ,
+            created_by: user?.id ,
             first_name: firstName || "",
             last_name: lastName || "",
             image: parti.image || "",
@@ -139,6 +139,5 @@ const searchChatsContacts = AsyncHandler(async (req: Request, res: Response) => 
 export default {
     searchUser,
     searchChatsContacts,
-
     createConversationParticipant
 }

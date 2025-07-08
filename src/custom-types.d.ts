@@ -4,7 +4,7 @@ import { Request } from "express";
 
 
 export interface AuthUser {
-    id: number;
+    id: string;
     name: string;
     phone: string;
     image: string | null
@@ -13,7 +13,7 @@ export interface AuthUser {
 
 
 export interface User {
-    id: number,
+    id: string,
     name: string,
     image?: string | null,
     phone: string,
@@ -22,15 +22,15 @@ export interface User {
     updated_at: Date,
     last_seen?: Date | null,
     about?: string | null,
-    verificationId: number,
-    twoFAId?: number | null
+    verificationId: string,
+    twoFAId?: string | null
 }
 
 export type ConversationType = {
-    id: number
+    id: string
     name: string | null
     description: string | null
-    created_by: number
+    created_by: string
     avatar: string | null
     type: string
     created_at: Date,
@@ -39,25 +39,25 @@ export type ConversationType = {
 
 
 export type SearchChatsContactsType = {
-    id: number
+    id: string
     first_name?: string | null
     last_name?: string | null
-    conversationId: number | null
+    conversationId: string | null
     conversation?: ConversationType | null
     image?: string | null
-    userId: number
+    userId: string
     created_at: Date
     updated_at: Date
     role: string
-    created_by: number
+    created_by: string
 }
 
 
 export type MessageType = {
-    id: number
+    id: string
     content: string
-    senderId: number
-    conversationId: number
+    senderId: string
+    conversationId: string
     messageType: string
     mediaUrl?: string
     created_at: Date
@@ -72,10 +72,10 @@ export interface IConversation {
 }
 
 export type MessagePayloadType = {
-    userId: number,
+    userId: string,
     msg: string
     convType: TypeEnum,
-    partiId: number,
+    partiId: string,
     mediaUrl: string,
     type: MessageTypeEnum
 }
