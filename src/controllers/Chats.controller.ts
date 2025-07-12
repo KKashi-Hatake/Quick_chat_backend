@@ -63,7 +63,12 @@ const sendMsg = AsyncHandler(async (req: Request, res: Response) => {
                     }
                 },
                 include: {
-                    MessageStatus: true
+                    MessageStatus: true,
+                    sender: {
+                        select: {
+                            userId: true
+                        }
+                    }
                 }
             });
             await prisma.conversation.update({
@@ -71,6 +76,7 @@ const sendMsg = AsyncHandler(async (req: Request, res: Response) => {
                 data: { updated_at: new Date() }
             });
             if (receiverSocketId) {
+                console.log('here')
                 io.to(receiverSocketId).emit("message", { convParti, message });
             }
             return res.json({ success: true, message: "Message Sent Successfully", msg: message });
@@ -197,10 +203,7 @@ const getAllMessages = AsyncHandler(async (req: Request, res: Response) => {
             MessageStatus: true,
             sender: {
                 select: {
-                    first_name: true,
-                    last_name: true,
-                    image: true,
-                    id: true
+                    userId: true
                 }
             }
         },

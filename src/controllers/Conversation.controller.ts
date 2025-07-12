@@ -33,6 +33,8 @@ const getAllConv = AsyncHandler(async (req: Request, res: Response) => {
             first_name: true,
             last_name: true,
             image: true,
+            userId: true,
+            id: true,
         },
     });
     if (participants) {

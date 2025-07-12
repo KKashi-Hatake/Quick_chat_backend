@@ -10,6 +10,7 @@ interface CustomSocket extends Socket {
 
 
 export const getReceiverSocketId = (receiverId: string) => {
+    console.log("Getting receiver socket id for", userSocketMap);
     return userSocketMap[receiverId];
 };
 
@@ -32,7 +33,7 @@ export function setupSocket(io: Server) {
         console.log("Client connected", socket.id);
         const userIdStr = socket.handshake.query.userId as string || "";
         console.log(userIdStr)
-        if (!userIdStr) {
+        if (userIdStr) {
             userSocketMap[userIdStr] = socket.id;
         }
 
