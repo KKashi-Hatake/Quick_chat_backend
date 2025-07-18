@@ -82,6 +82,21 @@ export type MessagePayloadType = {
 }
 
 
+export type MessageStatusType = {
+      id: string,
+      messageId: string,
+      status: string,
+      created_at: Date,
+      updated_at: Date,
+      message:  { conversationId: string | null; } 
+}
+
+
+
+
+
+
+
 declare module "express-serve-static-core" {
     interface Request {
         user?: AuthUser;

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import AsyncHandler from "../middlewares/AsyncHandler";
-import { AuthUser, IConversation, SearchChatsContactsType } from "../custom-types";
+import { AuthUser, IConversation, MessageStatusType, SearchChatsContactsType } from "../custom-types";
 import prisma from "../config/db.config";
 import { getPresigned } from "../utils/getPresigned";
 
@@ -44,7 +44,7 @@ const getAllConv = AsyncHandler(async (req: Request, res: Response) => {
         }
     })
     let result: IConversation[] = [];
-    let unreadCountsPromise: Promise<any>[] = [];
+    let unreadCountsPromise: Promise<MessageStatusType[]>[] = [];
     if (conversationParticipants.length > 0) {
         const processedParticipantsPromise = conversationParticipants.map(async (val) => {
             unreadCountsPromise.push(prisma.messageStatus.findMany({
@@ -66,24 +66,26 @@ const getAllConv = AsyncHandler(async (req: Request, res: Response) => {
             }))
             return val?.image ? await getPresigned(val.image) : val.image;
         })
-        console.log("Participants", unreadCountsPromise);
+
         const [processedParticipants, unreadCounts] = await Promise.all([
             Promise.allSettled(processedParticipantsPromise),
             Promise.allSettled(unreadCountsPromise)
         ]);
 
-        const grouped = {};
-
-        for (const msgStatus of unreadCounts) {
-            console.log("msgStatus", msgStatus);
-            // const convId = msgStatus.message.conversationId;
-            // if (!grouped[convId]) grouped[convId] = 0;
-            // grouped[convId]++;
+        const grouped: { [key: string]: number } = {};
+        if (unreadCounts[0].status === 'fulfilled') {
+            for (const msgStatus of unreadCounts[0].value) {
+                const convId = msgStatus.message.conversationId;
+                if (!convId) continue;
+                if (!grouped[convId]) grouped[convId] = 0;
+                grouped[convId]++;
+            }
         }
 
         // Extract successful results only
         result = conversationParticipants.map((record, index) => ({
             ...record,
+            unreadCount: record?.conversation?.id ? grouped[record.conversation.id] : 0,
             image:
                 processedParticipants[index].status === "fulfilled"
                     ? processedParticipants[index].value
