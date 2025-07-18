@@ -76,7 +76,6 @@ const sendMsg = AsyncHandler(async (req: Request, res: Response) => {
                 data: { updated_at: new Date() }
             });
             if (receiverSocketId) {
-                console.log('here')
                 io.to(receiverSocketId).emit("message", { convParti, message });
             }
             return res.json({ success: true, message: "Message Sent Successfully", msg: message });

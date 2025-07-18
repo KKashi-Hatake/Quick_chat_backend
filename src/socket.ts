@@ -10,7 +10,6 @@ interface CustomSocket extends Socket {
 
 
 export const getReceiverSocketId = (receiverId: string) => {
-    console.log("Getting receiver socket id for", userSocketMap);
     return userSocketMap[receiverId];
 };
 
@@ -19,14 +18,6 @@ const userSocketMap: { [key: string]: string } = {}; // {userId: socketId}
 
 
 export function setupSocket(io: Server) {
-    // io.use((socket: CustomSocket, next) => {
-    //     const room = socket.handshake.auth.room || socket.handshake.headers.room;
-    //     if (!room) {
-    //         return next(new Error('Invalid room, Please pass correct room id'))
-    //     }
-    //     socket.room = room;
-    //     next();
-    // })
 
 
     io.on("connection", (socket: CustomSocket) => {
@@ -54,3 +45,20 @@ export function setupSocket(io: Server) {
         })
     })
 }
+
+
+// await prisma.messageStatus.updateMany({
+//   where: {
+//     message: {
+//       conversationId: convoId,
+//       receiverId: participantId, // the one reading it
+//     },
+//     status: {
+//       not: 'read',
+//     },
+//   },
+//   data: {
+//     status: 'read',
+//     updated_at: new Date(),
+//   },
+// });

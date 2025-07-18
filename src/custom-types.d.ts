@@ -65,6 +65,7 @@ export type MessageType = {
 }
 
 export interface IConversation {
+    id:string
     first_name?: string | null
     last_name?: string | null
     image?: string | null

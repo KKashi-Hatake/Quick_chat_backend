@@ -37,35 +37,62 @@ const getAllConv = AsyncHandler(async (req: Request, res: Response) => {
             id: true,
         },
     });
-    if (participants) {
-        const processedResults = await Promise.allSettled(
-            participants.map(async (val) => {
-                try {
-                    val.image = val?.image ? await getPresigned(val.image) : val.image;
-                } catch (e) {
-                    console.error("Failed to get presigned URL", e);
-                }
-                return val;
-            })
-        );
-        let result: IConversation[] = [];
-        // Extract successful results only
-        for (const resultItem of processedResults) {
-            if (resultItem.status === 'fulfilled') {
-                const val = resultItem.value;
-                if (val.conversation !== null) {
-                    result.push(val);
-                }
-            }
+    let conversationParticipants: IConversation[] = [];
+    participants.forEach((val) => {
+        if (val.conversation !== null) {
+            conversationParticipants.push(val);
+        }
+    })
+    let result: IConversation[] = [];
+    let unreadCountsPromise: Promise<any>[] = [];
+    if (conversationParticipants.length > 0) {
+        const processedParticipantsPromise = conversationParticipants.map(async (val) => {
+            unreadCountsPromise.push(prisma.messageStatus.findMany({
+                where: {
+                    status: {
+                        not: 'read',
+                    },
+                    message: {
+                        is: { senderId: val.id },
+                    },
+                },
+                include: {
+                    message: {
+                        select: {
+                            conversationId: true,
+                        },
+                    },
+                },
+            }))
+            return val?.image ? await getPresigned(val.image) : val.image;
+        })
+        console.log("Participants", unreadCountsPromise);
+        const [processedParticipants, unreadCounts] = await Promise.all([
+            Promise.allSettled(processedParticipantsPromise),
+            Promise.allSettled(unreadCountsPromise)
+        ]);
+
+        const grouped = {};
+
+        for (const msgStatus of unreadCounts) {
+            console.log("msgStatus", msgStatus);
+            // const convId = msgStatus.message.conversationId;
+            // if (!grouped[convId]) grouped[convId] = 0;
+            // grouped[convId]++;
         }
 
+        // Extract successful results only
+        result = conversationParticipants.map((record, index) => ({
+            ...record,
+            image:
+                processedParticipants[index].status === "fulfilled"
+                    ? processedParticipants[index].value
+                    : null, // or a fallback placeholder
+        }));
+
     }
-    return res.json({ success: true, message: "Participants fetched successfully.", data: participants })
-
-
+    return res.json({ success: true, message: "Participants fetched successfully.", data: result })
 })
-
-
 
 
 
