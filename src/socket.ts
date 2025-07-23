@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io"
 import prisma from "./config/db.config";
+import { statusChanged } from "./socketListener/statusChange";
 
 
 
@@ -21,44 +22,18 @@ export function setupSocket(io: Server) {
 
 
     io.on("connection", (socket: CustomSocket) => {
-        console.log("Client connected", socket.id);
         const userIdStr = socket.handshake.query.userId as string || "";
-        console.log(userIdStr)
+        console.log("Client:", userIdStr, 'socket:', socket.id);
         if (userIdStr) {
             userSocketMap[userIdStr] = socket.id;
         }
 
-        // socket.join(socket.room!)
-
-        socket.on("message", async (data) => {
-            console.log("Server side message", data);
-            // socket.broadcast.emit("message", data);
-            await prisma.conversation.create({
-                data: data
-            })
-            socket.to(socket?.room!).emit('message', data)
-        })
+        statusChanged(socket);
 
         socket.on("disconnect", () => {
             delete userSocketMap[userIdStr];
-            console.log("A user got disconnected", socket.id)
+            // console.log("A user got disconnected", socket.id)
         })
     })
 }
 
-
-// await prisma.messageStatus.updateMany({
-//   where: {
-//     message: {
-//       conversationId: convoId,
-//       receiverId: participantId, // the one reading it
-//     },
-//     status: {
-//       not: 'read',
-//     },
-//   },
-//   data: {
-//     status: 'read',
-//     updated_at: new Date(),
-//   },
-// });
