@@ -16,10 +16,16 @@ const searchUser = AsyncHandler(async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({
         where: { phone: search as string }
     })
+    const convParti = await prisma.conversationParticipants.findFirst({
+        where: {
+            created_by: req.user?.id,
+            userId: user?.id
+        }
+    })
     if (!user) {
         return res.status(404).json({ success: false, message: "User not found." })
     }
-    return res.status(200).json({ success: true, message: "User fetched successfully", user: user.id })
+    return res.status(200).json({ success: true, message: "User fetched successfully", user: user.id, convParti })
 })
 
 

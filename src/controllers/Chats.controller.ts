@@ -161,7 +161,12 @@ const sendMsg = AsyncHandler(async (req: Request, res: Response) => {
                     }
                 },
                 include: {
-                    MessageStatus: true
+                    MessageStatus: true,
+                    sender: {
+                        select: {
+                            userId: true
+                        }
+                    }
                 }
             });
 

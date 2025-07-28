@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io"
-import prisma from "./config/db.config";
-import { statusChanged } from "./socketListener/statusChange";
+import { statusChanged } from "./socketListener/statusChange.listener";
+import { conversationListener } from "./socketListener/conversation.listener";
 
 
 
@@ -29,6 +29,7 @@ export function setupSocket(io: Server) {
         }
 
         statusChanged(socket);
+        conversationListener(socket);
 
         socket.on("disconnect", () => {
             delete userSocketMap[userIdStr];
