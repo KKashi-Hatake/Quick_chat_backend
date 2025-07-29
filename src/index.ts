@@ -4,11 +4,11 @@ import 'dotenv/config';
 import { Server } from "socket.io"
 import { createServer } from 'http';
 import { createAdapter } from "@socket.io/redis-streams-adapter";
-import routes from './routes/index.ts'
-import { setupSocket } from './socket.ts';
-// import redis from './config/redis.config.ts';
+import routes from './routes/index'
+import { setupSocket } from './socket';
+// import redis from './config/redis.config';
 import { instrument } from "@socket.io/admin-ui"
-import prisma from './config/db.config.ts';
+import prisma from './config/db.config';
 
 
 
