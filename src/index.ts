@@ -4,10 +4,11 @@ import 'dotenv/config';
 import { Server } from "socket.io"
 import { createServer } from 'http';
 import { createAdapter } from "@socket.io/redis-streams-adapter";
-import authRoutes from './routes/index.ts'
+import routes from './routes/index.ts'
 import { setupSocket } from './socket.ts';
 // import redis from './config/redis.config.ts';
 import { instrument } from "@socket.io/admin-ui"
+import prisma from './config/db.config.ts';
 
 
 
@@ -19,7 +20,7 @@ const server = createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:3000", "https://admin.socket.io"],
+        origin: ["http://192.168.1.4:3000", "http://localhost:3000", "https://admin.socket.io"],
         credentials: true,
     },
     // adapter: createAdapter(redis)
@@ -39,7 +40,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 
 
-app.use('/api/v1', authRoutes)
+app.use('/api/v1', routes)
 
 const port = process.env.PORT || 8010;
 
@@ -50,6 +51,14 @@ app.get('/', (req: Request, res: Response) => {
 
 
 server.listen(port, () => console.log(`server is running on ${port}`))
+
+// Handle Prisma connection
+prisma.$connect()
+    .then(() => console.log('Database connected successfully'))
+    .catch((err: any) => {
+        console.error('Database connection failed:', err);
+        process.exit(1);
+    });
 
 setupSocket(io);
 export { io };

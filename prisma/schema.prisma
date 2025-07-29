@@ -8,12 +8,17 @@ datasource db {
 }
 
 // ENUM Values
-enum Role {
+enum RoleEnum {
     admin
     member
 }
 
-enum MessageType {
+enum TypeEnum {
+    normal
+    group
+}
+
+enum MessageTypeEnum {
     text
     image
     video
@@ -28,83 +33,94 @@ enum MessageStatusEnum {
 }
 
 model User {
-    id                       Int                        @id @default(autoincrement())
-    name                     String                     @db.VarChar(191)
-    image                    String?
-    phone                    String                     @unique
-    password                 String
-    created_at               DateTime                   @default(now())
-    last_seen                DateTime?                  @default(now())
-    about                    String?                    @default("")
-    verificationId           Int                        @unique
-    twoFAId                  Int?                       @unique
-    verification             Verification?              @relation(fields: [verificationId], references: [id])
-    twoFA                    TwoFA?                     @relation(fields: [twoFAId], references: [id])
-    Message                  Message[]
-    conversation             Conversation[]
-    conversationParticipants ConversationParticipants[]
-    MessageStatus            MessageStatus[]
+    id               String                        @id @default(cuid())
+    name             String                     @db.VarChar(191)
+    image            String?
+    phone            String                     @unique
+    password         String
+    created_at       DateTime                   @default(now())
+    updated_at       DateTime                   @default(now())
+    last_seen        DateTime?                  @default(now())
+    about            String?                    @default("")
+    verificationId   String                        @unique
+    twoFAId          String?                       @unique
+    verification     Verification?              @relation(fields: [verificationId], references: [id])
+    twoFA            TwoFA?                     @relation(fields: [twoFAId], references: [id])
+    conversation     Conversation[]
+    UserParticipants ConversationParticipants[] @relation("UserParticipant")
+    CreatedBy        ConversationParticipants[] @relation("CreatedBy")
 
     @@map("users")
 }
 
 model Verification {
-    id     Int     @id @default(autoincrement())
+    id     String     @id @default(cuid())
     otp    Int
     status Boolean @default(false)
     user   User?
 }
 
 model TwoFA {
-    id     Int     @id @default(autoincrement())
+    id     String     @id @default(cuid())
     status Boolean @default(false)
     user   User?
 }
 
 model Conversation {
-    id           Int                        @id @default(autoincrement())
+    id           String                        @id @default(cuid())
     name         String?
     description  String?
-    created_by   Int
+    created_by   String
     avatar       String?
+    type         TypeEnum                   @default(normal)
     created_at   DateTime                   @default(now())
+    updated_at   DateTime                   @default(now())
     user         User                       @relation(fields: [created_by], references: [id])
     participants ConversationParticipants[]
     messages     Message[]
 }
 
 model ConversationParticipants {
-    id             Int          @id @default(autoincrement())
-    conversationId Int
-    conversation   Conversation @relation(fields: [conversationId], references: [id])
-    userId         Int
-    user           User         @relation(fields: [userId], references: [id])
-    joined_at      DateTime     @default(now())
-    role           Role         @default(member)
+    id             String           @id @default(cuid())
+    first_name     String?
+    last_name      String?
+    conversationId String?
+    image          String?
+    about          String?       @default("")
+    conversation   Conversation? @relation(fields: [conversationId], references: [id])
+    userId         String
+    user           User          @relation("UserParticipant", fields: [userId], references: [id], map: "fk_user_participant")
+    created_at     DateTime      @default(now())
+    updated_at     DateTime      @default(now())
+    role           RoleEnum      @default(member)
+    created_by     String
+    creator        User          @relation("CreatedBy", fields: [created_by], references: [id], map: "fk_created_by")
+    sender         Message[]     @relation("senderParticipant")
+    receiver       Message[]     @relation("receiverParticipant")
 }
 
 model Message {
-    id             Int             @id @default(autoincrement())
+    id             String                      @id @default(cuid())
     content        String
-    senderId       Int
-    conversationId Int?
-    messageType    MessageType     @default(text)
+    senderId       String
+    receiverId     String
+    conversationId String?
+    messageType    MessageTypeEnum          @default(text)
     mediaUrl       String?
-    created_at     DateTime        @default(now())
-    is_deleted     Boolean         @default(false)
-    user           User            @relation(fields: [senderId], references: [id])
-    Conversation   Conversation?   @relation(fields: [conversationId], references: [id])
-    MessageStatus  MessageStatus[]
+    created_at     DateTime                 @default(now())
+    updated_at     DateTime                 @default(now())
+    is_deleted     Boolean                  @default(false)
+    sender         ConversationParticipants @relation("senderParticipant", fields: [senderId], references: [id], map: "Message_senderId_fkey")
+    receiver       ConversationParticipants @relation("receiverParticipant", fields: [senderId], references: [id], map: "Message_receiverId_fkey")
+    Conversation   Conversation?            @relation(fields: [conversationId], references: [id])
+    MessageStatus  MessageStatus?
 }
 
 model MessageStatus {
-    id         Int               @id @default(autoincrement())
-    messageId  Int
-    userId     Int
+    id         String               @id @default(cuid())
+    messageId  String               @unique
     status     MessageStatusEnum // sent, delivered, read
+    created_at DateTime          @default(now())
     updated_at DateTime          @default(now())
-    message    Message?          @relation(fields: [messageId], references: [id])
-    user       User?             @relation(fields: [userId], references: [id])
-
-    @@unique([messageId, userId])
+    message    Message           @relation(fields: [messageId], references: [id])
 }
