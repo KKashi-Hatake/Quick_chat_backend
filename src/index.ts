@@ -8,6 +8,7 @@ import routes from './routes/index.ts'
 import { setupSocket } from './socket.ts';
 // import redis from './config/redis.config.ts';
 import { instrument } from "@socket.io/admin-ui"
+import prisma from './config/db.config.ts';
 
 
 
@@ -50,6 +51,14 @@ app.get('/', (req: Request, res: Response) => {
 
 
 server.listen(port, () => console.log(`server is running on ${port}`))
+
+// Handle Prisma connection
+prisma.$connect()
+    .then(() => console.log('Database connected successfully'))
+    .catch((err: any) => {
+        console.error('Database connection failed:', err);
+        process.exit(1);
+    });
 
 setupSocket(io);
 export { io };
