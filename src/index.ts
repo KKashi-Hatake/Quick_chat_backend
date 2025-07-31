@@ -9,6 +9,7 @@ import { setupSocket } from './socket';
 // import redis from './config/redis.config';
 import { instrument } from "@socket.io/admin-ui"
 import prisma from './config/db.config';
+import morgan from 'morgan'
 
 
 
@@ -37,6 +38,7 @@ const io = new Server(server, {
 
 
 // Middlewares
+app.use(morgan('combined'));
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
