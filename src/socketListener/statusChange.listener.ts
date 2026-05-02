@@ -45,10 +45,18 @@ export const statusChanged = (socket: Socket) => {
             },
         });
         if (senderSocketId) {
-            io.to(senderSocketId).emit('ack:message:read:batch', { convId: data.conversation })
+            // io.to(senderSocketId).emit('ack:message:read:batch', { convId: data.conversation })
+            for (const socketId of senderSocketId) {
+                // fire event
+                io.to(socketId).emit("ack:message:read:batch", { convId: data.conversation });
+            }
         }
         if (readerSocketId) {
-            io.to(readerSocketId).emit('message:read:confirmation', { convId: data.conversation })
+            // io.to(readerSocketId).emit('message:read:confirmation', { convId: data.conversation })
+            for (const socketId of readerSocketId) {
+                // fire event
+                io.to(socketId).emit("message:read:confirmation", { convId: data.conversation });
+            }
         }
     }
 
@@ -75,7 +83,9 @@ export const statusChanged = (socket: Socket) => {
         });
         
         if (senderSocketId) {
-            io.to(senderSocketId).emit('ack:message:delivered', { convId: data.conversation })
+            for (const socketId of senderSocketId) {
+                io.to(socketId).emit("ack:message:delivered", { convId: data.conversation });
+            }
         }
     }
 

@@ -77,7 +77,10 @@ const sendMsg = AsyncHandler(async (req: Request, res: Response) => {
             });
             let socketResponse: boolean = false;
             if (receiverSocketId) {
-                socketResponse = io.to(receiverSocketId).emit("message", { convParti, message });
+                // socketResponse = io.to(receiverSocketId).emit("message", { convParti, message });
+                for (const socketId of receiverSocketId) {
+                    io.to(socketId).emit("message", { convParti, message });
+                }
             }
             return res.json({ success: true, message: "Message Sent Successfully", msg: message });
 
@@ -121,7 +124,9 @@ const sendMsg = AsyncHandler(async (req: Request, res: Response) => {
                 },
             });
             if (receiverSocketId) {
-                io.to(receiverSocketId).emit("newMessage", { convParti, message: conversation.messages[0] });
+                for (const socketId of receiverSocketId) {
+                    io.to(socketId).emit("newMessage", { convParti, message: conversation.messages[0] });
+                }
             }
             return res.json({ success: true, message: "Message Sent Successfully", msg: conversation.messages[0] });
         }
@@ -186,7 +191,9 @@ const sendMsg = AsyncHandler(async (req: Request, res: Response) => {
             return res.status(400).json({ success: false, message: "Message Not Sent, Someting went wrong!" })
         }
         if (receiverSocketId) {
-            io.to(receiverSocketId).emit("newConv", { convParti, message: newMsg });
+            for (const socketId of receiverSocketId) {
+                io.to(socketId).emit("newConv", { convParti, message: newMsg });
+            }
         }
         return res.json({ success: true, message: "Message Sent Successfully", msg: newMsg });
     }

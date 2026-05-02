@@ -59,6 +59,7 @@ async function login(req: Request, res: Response) {
             }
         })
     } catch (error) {
+        console.error("Error while logging in", error)
         return res.status(500).json({ message: "Something went wrong, Please try again!" })
     }
 }
