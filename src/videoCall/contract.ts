@@ -45,6 +45,9 @@ export type VideoCallPayloadBase = {
 export type CallInvitePayload = VideoCallPayloadBase & {
     callType: VideoCallType;
     conversationId?: string;
+    callerName?: string;
+    callerImage?: string | null;
+    callerPhone?: string;
 };
 
 export type CallAcceptPayload = VideoCallPayloadBase;

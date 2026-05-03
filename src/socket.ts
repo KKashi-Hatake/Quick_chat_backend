@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io"
 import { statusChanged } from "./socketListener/statusChange.listener";
 import { conversationListener } from "./socketListener/conversation.listener";
+import { callListener } from "./socketListener/call.listener";
 
 
 
@@ -33,6 +34,7 @@ export function setupSocket(io: Server) {
 
         statusChanged(socket);
         conversationListener(socket);
+        callListener(socket);
 
         socket.on("disconnect", () => {
             const socketIds = userSocketMap.get(userIdStr);
@@ -46,4 +48,3 @@ export function setupSocket(io: Server) {
         })
     })
 }
-
