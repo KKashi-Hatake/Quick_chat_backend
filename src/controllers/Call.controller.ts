@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import AsyncHandler from "../middlewares/AsyncHandler";
 import prisma from "../config/db.config";
 import { AuthUser } from "../custom-types";
+import { getPresigned } from "../utils/getPresigned";
 
 const getCallHistory = AsyncHandler(async (req: Request, res: Response) => {
     const user = req.user as AuthUser;
@@ -58,10 +59,49 @@ const getCallHistory = AsyncHandler(async (req: Request, res: Response) => {
         },
     });
 
+    const processedCalls = await Promise.all(
+        calls.map(async (call) => {
+            let callerImage = call.caller?.image || null;
+            let receiverImage = call.receiver?.image || null;
+
+            if (callerImage) {
+                try {
+                    callerImage = await getPresigned(callerImage);
+                } catch (error) {
+                    console.error("Failed to generate caller image presigned URL", error);
+                }
+            }
+
+            if (receiverImage) {
+                try {
+                    receiverImage = await getPresigned(receiverImage);
+                } catch (error) {
+                    console.error("Failed to generate receiver image presigned URL", error);
+                }
+            }
+
+            return {
+                ...call,
+                caller: call.caller
+                    ? {
+                        ...call.caller,
+                        image: callerImage,
+                    }
+                    : call.caller,
+                receiver: call.receiver
+                    ? {
+                        ...call.receiver,
+                        image: receiverImage,
+                    }
+                    : call.receiver,
+            };
+        })
+    );
+
     return res.status(200).json({
         success: true,
         message: "Call history fetched successfully.",
-        data: calls,
+        data: processedCalls,
     });
 });
 
