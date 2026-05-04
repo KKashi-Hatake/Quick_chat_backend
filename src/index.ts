@@ -19,7 +19,7 @@ const app = express();
 
 const server = createServer(app)
 
-const client_url=process.env.CLIENT_URL || '';
+const client_url = process.env.CLIENT_URL || '';
 
 const io = new Server(server, {
     cors: {
@@ -40,7 +40,10 @@ const io = new Server(server, {
 // Middlewares
 app.use(morgan('combined'));
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: [client_url, "http://localhost:3000"],
+    credentials: true,
+}));
 app.use(express.urlencoded({ extended: false }));
 
 
@@ -66,4 +69,3 @@ prisma.$connect()
 
 setupSocket(io);
 export { io };
-
